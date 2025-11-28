@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # CashCompass Landing Page - Test
 
 A standalone version of the CashCompass landing page with all components and styling.
@@ -71,3 +72,6 @@ Make sure to include FontAwesome for icons. Add this to your HTML head or instal
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
 />
 ```
+=======
+# Cash-Compass
+>>>>>>> 86b6e68e428982c66b909c8c054c25f0c308f041
