@@ -1,0 +1,79 @@
+/* ===== CTA SECTION ===== */
+.cta-section {
+  text-align: center;
+  padding: 60px 0;
+  background: linear-gradient(135deg, var(--gray-50), #f0f9ff);
+  border-radius: 30px;
+  margin: 40px 0;
+}
+
+.cta-section h2 {
+  font-size: 3.2rem;
+  margin-bottom: 25px;
+  color: var(--primary);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.cta-section p {
+  color: var(--gray-600);
+  max-width: 700px;
+  margin: 0 auto 40px;
+  font-size: 1.3rem;
+  line-height: 1.7;
+}
+
+.cta-section .primary-button {
+  display: inline-block;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  .cta-section h2 {
+    font-size: 2.8rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .cta-section {
+    padding: 80px 0;
+    margin: 60px 0;
+  }
+
+  .cta-section h2 {
+    font-size: 2.4rem;
+  }
+
+  .cta-section p {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .cta-section {
+    padding: 60px 0;
+    margin: 40px 0;
+  }
+
+  .cta-section h2 {
+    font-size: 1.8rem;
+  }
+
+  .cta-section p {
+    font-size: 1rem;
+  }
+
+  .cta-section .primary-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .cta-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .cta-section {
+    padding: 40px 0;
+  }
+}
