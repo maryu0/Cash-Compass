@@ -7,7 +7,6 @@ import Pricing from "../components/Pricing";
 import Testimonials from "../components/Testimonials";
 import CTA from "../components/CTA";
 import Footer from "../components/Footer";
-import ChatbotWidget from "../components/ChatbotWidget";
 
 function LandingPage() {
   useEffect(() => {
@@ -100,7 +99,6 @@ function LandingPage() {
       <Testimonials />
       <CTA />
       <Footer />
-      <ChatbotWidget />
     </div>
   );
 }
