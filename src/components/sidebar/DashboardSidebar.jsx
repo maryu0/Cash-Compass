@@ -10,7 +10,7 @@ const DashboardSidebar = ({
 }) => {
   const location = useLocation();
 
-  const mainNavItems = [
+  const navItems = [
     { name: "Dashboard", icon: "fa-th-large", path: "/dashboard" },
     {
       name: "Transactions",
@@ -18,9 +18,6 @@ const DashboardSidebar = ({
       path: "/dashboard/transactions",
     },
     { name: "AI Buddy", icon: "fa-robot", path: "/dashboard/chatbot" },
-  ];
-
-  const secondaryNavItems = [
     {
       name: "Crisis Alerts",
       icon: "fa-bell",
@@ -28,7 +25,6 @@ const DashboardSidebar = ({
       badge: 2,
     },
     { name: "Goals", icon: "fa-bullseye", path: "/dashboard/goals" },
-    { name: "Reports", icon: "fa-file-alt", path: "/dashboard/reports" },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -64,34 +60,10 @@ const DashboardSidebar = ({
         </div>
       </div>
 
-      {/* Main Navigation */}
+      {/* Navigation */}
       <div className="sidebar-section">
-        <span className="section-label">MAIN MENU</span>
         <nav className="sidebar-nav">
-          {mainNavItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`nav-item ${isActive(item.path) ? "active" : ""}`}
-              title={item.name}
-            >
-              <span className="nav-icon">
-                <i className={`fas ${item.icon}`}></i>
-              </span>
-              <span className="nav-text">{item.name}</span>
-              {isActive(item.path) && (
-                <span className="active-indicator"></span>
-              )}
-            </Link>
-          ))}
-        </nav>
-      </div>
-
-      {/* Secondary Navigation */}
-      <div className="sidebar-section">
-        <span className="section-label">TOOLS</span>
-        <nav className="sidebar-nav">
-          {secondaryNavItems.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
@@ -141,17 +113,6 @@ const DashboardSidebar = ({
             <i className="fas fa-cog"></i>
           </span>
           <span className="nav-text">Settings</span>
-        </Link>
-
-        <Link
-          to="/dashboard/help"
-          className={`nav-item ${isActive("/dashboard/help") ? "active" : ""}`}
-          title="Help & Support"
-        >
-          <span className="nav-icon">
-            <i className="fas fa-question-circle"></i>
-          </span>
-          <span className="nav-text">Help & Support</span>
         </Link>
 
         <button onClick={onLogout} className="logout-btn" title="Logout">
