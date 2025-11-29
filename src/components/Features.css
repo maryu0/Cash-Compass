@@ -48,16 +48,17 @@
 }
 
 .left-column {
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 .right-column {
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 /* Feature Items */
 .feature-item {
   width: 100%;
+  max-width: 350px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -88,7 +89,8 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   height: 100%;
-  min-height: 90px;
+  min-height: 100px;
+  box-sizing: border-box;
 }
 
 .feature-item:hover .feature-content {
@@ -124,6 +126,7 @@
   color: var(--gray-600);
   line-height: 1.4;
   margin: 0;
+  min-height: 2.8em;
 }
 
 /* iPad Mockup */

@@ -3,7 +3,12 @@ footer {
   background: var(--primary);
   color: white;
   padding: 60px 40px 30px;
-  width: 100%;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
   box-sizing: border-box;
 }
 

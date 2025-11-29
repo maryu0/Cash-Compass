@@ -1,25 +1,23 @@
 /* ===== DASHBOARD PREVIEW ===== */
 .dashboard-preview {
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
   background: white;
-  border-radius: var(--border-radius);
+  border-radius: 0;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
   position: relative;
-  transform: perspective(1000px) rotateY(-5deg);
   transition: all 0.5s ease;
   border: 1px solid var(--gray-200);
 }
 
 .dashboard-preview:hover {
-  transform: perspective(1000px) rotateY(0deg);
   box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.3);
 }
 
 .dashboard-header {
   background: linear-gradient(135deg, #f3f4f6, #f9fafb);
-  padding: 16px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--gray-200);
 }
 
@@ -49,7 +47,7 @@
 
 .dashboard-content {
   display: flex;
-  height: 480px;
+  height: 320px;
   overflow: hidden;
 }
 

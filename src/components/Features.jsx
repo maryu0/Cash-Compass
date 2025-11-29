@@ -32,7 +32,7 @@ export default function Features() {
     {
       icon: "fas fa-wallet",
       title: "Advanced Budget Feature",
-      desc: "Set a monthly budget for each category",
+      desc: "Set a monthly budget for each category and track spending",
       position: "middle-right",
       color: "#F38181",
       screen: "budget",
@@ -40,7 +40,7 @@ export default function Features() {
     {
       icon: "fas fa-chart-line",
       title: "Asset Graphs",
-      desc: "Review asset trend in your chart",
+      desc: "Review your asset trends and portfolio growth in detailed charts",
       position: "bottom-right",
       color: "#AA96DA",
       screen: "assets",

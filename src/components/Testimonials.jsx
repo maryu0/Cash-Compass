@@ -5,7 +5,7 @@ export default function Testimonials() {
   const testimonials = [
     {
       id: 1,
-      name: "Priya Sharma",
+      name: "Pratim Prakash",
       role: "Gig Worker & Tutor",
       content:
         "CashCompass helped me manage my unpredictable income. The alerts warn me before money gets tight, and the AI coach gives advice I actually understand. Total game changer!",
@@ -13,7 +13,7 @@ export default function Testimonials() {
     },
     {
       id: 2,
-      name: "Miguel Rodriguez",
+      name: "Ayush Gupta",
       role: "Freelance Designer",
       content:
         "Finally found something designed for people like me. The app understands my fluctuating income and helps me save smartly. In Spanish too—that means everything.",
@@ -21,7 +21,7 @@ export default function Testimonials() {
     },
     {
       id: 3,
-      name: "Amara Okonkwo",
+      name: "Aditya Pramanik",
       role: "Street Vendor & Small Business Owner",
       content:
         "The simple language and lack of jargon is perfect. I now have an emergency fund and actually understand my spending. CashCompass gave me confidence with my money.",

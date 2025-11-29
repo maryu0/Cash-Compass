@@ -5,7 +5,7 @@ export default function Pricing() {
   const plans = [
     {
       name: "Essential",
-      price: "$0",
+      price: "₹0",
       description: "Start your financial journey",
       features: [
         "Income & expense tracking",
@@ -16,29 +16,18 @@ export default function Pricing() {
       cta: "Get Started",
     },
     {
-      name: "Smart Coach",
-      price: "$9.99/mo",
-      description: "Intelligent financial guidance",
+      name: "SmartGuard",
+      price: "₹75/mo",
+      description: "Complete AI-powered financial protection",
       features: [
-        "All Essential features",
-        "AI-powered risk detection",
-        "Income fluctuation alerts",
-        "24/7 Chat AI coach",
+        "Advanced AI Risk Prediction",
+        "Proactive AI Coaching",
+        "Goal-Based Budgeting",
+        "Income Fluctuation Alerts",
+        "Priority Alerts via SMS/WhatsApp",
+        "Debt Reduction Strategy Builder",
       ],
       highlighted: true,
-      cta: "Start Free Trial",
-    },
-    {
-      name: "Financial Guardian",
-      price: "$24.99/mo",
-      description: "Premium financial protection",
-      features: [
-        "All Smart Coach features",
-        "Personalized debt strategies",
-        "Dedicated financial advisor",
-        "Priority support & onboarding",
-      ],
-      highlighted: false,
       cta: "Start Free Trial",
     },
   ];
