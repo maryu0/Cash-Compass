@@ -17,6 +17,7 @@ const DashboardSidebar = ({
       icon: "fa-exchange-alt",
       path: "/dashboard/transactions",
     },
+    { name: "Budgets", icon: "fa-wallet", path: "/dashboard/budgets" },
     { name: "AI Buddy", icon: "fa-robot", path: "/dashboard/chatbot" },
     {
       name: "Crisis Alerts",

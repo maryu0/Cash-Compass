@@ -10,6 +10,7 @@ import TransactionsPage from "./pages/TransactionsPage";
 import SettingsPage from "./pages/SettingsPage";
 import CrisisAlertsPage from "./pages/CrisisAlertsPage";
 import GoalsPage from "./pages/GoalsPage";
+import BudgetsPage from "./pages/BudgetsPage";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/dashboard/chatbot" element={<ChatbotPage />} />
       <Route path="/dashboard/transactions" element={<TransactionsPage />} />
+      <Route path="/dashboard/budgets" element={<BudgetsPage />} />
       <Route path="/dashboard/settings" element={<SettingsPage />} />
       <Route path="/dashboard/alerts" element={<CrisisAlertsPage />} />
       <Route path="/dashboard/goals" element={<GoalsPage />} />
