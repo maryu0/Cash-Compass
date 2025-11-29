@@ -2,6 +2,14 @@
 import pandas as pd
 import numpy as np
 
+# Try to import budget optimizer
+try:
+    from budget_optimizer import get_budget_optimization_report, RISK_THRESHOLD as BUDGET_RISK_THRESHOLD
+    BUDGET_OPTIMIZER_AVAILABLE = True
+except ImportError:
+    BUDGET_OPTIMIZER_AVAILABLE = False
+    BUDGET_RISK_THRESHOLD = 80
+
 # Your categories (must match risk.py and data.py)
 INCOME_CATEGORY = "income"
 EXPENSE_CATEGORIES = [
@@ -149,11 +157,33 @@ def calculate_risk_score_from_transactions(transactions):
             "top_spending_category": top_category,
             "top_spending_amount": top_amount,
             "category_spending": category_breakdown,
-            "model_type": "rule-based"
+            "model_type": "rule-based",
+            "budget_optimization": _get_fallback_budget_optimization(risk_score, total_income, category_breakdown)
         }
         
     except Exception:
         return _default_response()
+
+
+def _get_fallback_budget_optimization(risk_score, income, category_spending):
+    """Get budget optimization for fallback risk calculator"""
+    if risk_score < BUDGET_RISK_THRESHOLD:
+        return None
+    
+    if BUDGET_OPTIMIZER_AVAILABLE:
+        try:
+            return get_budget_optimization_report(income, category_spending, risk_score)
+        except:
+            pass
+    
+    # Simple fallback optimization
+    return {
+        "triggered": True,
+        "risk_score": risk_score,
+        "threshold": BUDGET_RISK_THRESHOLD,
+        "message": "Budget optimization triggered (fallback mode)",
+        "recommendation": "Reduce discretionary spending by 20-30% immediately"
+    }
 
 def _default_response():
     # Return all categories with $0
@@ -169,5 +199,6 @@ def _default_response():
         "top_spending_category": "unknown",
         "top_spending_amount": 0,
         "category_spending": category_breakdown,
-        "model_type": "rule-based"
+        "model_type": "rule-based",
+        "budget_optimization": None
     }

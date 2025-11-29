@@ -28,6 +28,15 @@ except ImportError:
     FORECASTER_AVAILABLE = False
     print("Warning: Prophet not installed. Forecasting features disabled.")
 
+# Try to import budget optimizer
+try:
+    from budget_optimizer import get_budget_optimization_report, get_chatbot_budget_summary, RISK_THRESHOLD as BUDGET_RISK_THRESHOLD
+    BUDGET_OPTIMIZER_AVAILABLE = True
+except ImportError:
+    BUDGET_OPTIMIZER_AVAILABLE = False
+    BUDGET_RISK_THRESHOLD = 80
+    print("Warning: Budget optimizer not available.")
+
 # Conversation history for context
 conversation_history = {}
 
@@ -189,7 +198,7 @@ def detect_agentic_intent(user_message):
         actions.append('weekly_report')
     
     # Smart Budget triggers
-    budget_keywords = ['budget suggestion', 'smart budget', 'optimize budget', 'budget plan', 'create budget', 'make budget', 'budget for me', 'suggest budget']
+    budget_keywords = ['budget suggestion', 'smart budget', 'optimize budget', 'budget plan', 'create budget', 'make budget', 'budget for me', 'suggest budget', 'optimize my spending', 'budget optimization', 'reduce spending', 'cut expenses', 'save money', 'fix my budget']
     if any(phrase in user_message_lower for phrase in budget_keywords):
         actions.append('smart_budget')
     
@@ -285,7 +294,60 @@ Risk Factors:
 Current Recommendations:
 {chr(10).join('- ' + action for action in risk_data['recommended_actions'])}
 """
+    
+    # Add budget optimization context if risk is high (>=80%)
+    budget_optimization = risk_data.get("budget_optimization")
+    if budget_optimization and budget_optimization.get("triggered"):
+        budget_context = _format_budget_optimization_context(budget_optimization)
+        context += budget_context
+    
     return context, risk_data
+
+
+def _format_budget_optimization_context(budget_opt):
+    """Format budget optimization data for AI context"""
+    if not budget_opt or not budget_opt.get("triggered"):
+        return ""
+    
+    urgency = budget_opt.get("urgency", {})
+    
+    context = f"""
+
+🚨 BUDGET OPTIMIZATION ACTIVATED (Risk ≥ {budget_opt.get('threshold', 80)}%)
+{'='*50}
+Urgency Level: {urgency.get('label', 'ELEVATED')}
+
+💰 OPTIMIZATION SUMMARY:
+• Current Monthly Spending: ₹{budget_opt.get('current_total_spending', 0):,.0f}
+• Recommended Spending: ₹{budget_opt.get('optimized_total_spending', 0):,.0f}
+• Potential Monthly Savings: ₹{budget_opt.get('total_potential_savings', 0):,.0f} ({budget_opt.get('savings_percent', 0):.1f}%)
+• Target Monthly Spending: ₹{budget_opt.get('target_monthly_spending', 0):,.0f}
+
+📊 OPTIMIZED BUDGET BY CATEGORY:
+"""
+    
+    # Add category breakdown
+    category_breakdown = budget_opt.get("category_breakdown", [])
+    for cat in category_breakdown[:6]:  # Top 6 categories
+        if cat.get('savings', 0) > 0:
+            context += f"• {cat['category_display']}: ₹{cat['current']:,.0f} → ₹{cat['recommended']:,.0f} (cut ₹{cat['savings']:,.0f})\n"
+    
+    # Add recommendations
+    recommendations = budget_opt.get("recommendations", [])
+    if recommendations:
+        context += "\n🎯 AI-GENERATED BUDGET RECOMMENDATIONS:\n"
+        for rec in recommendations[:5]:
+            context += f"• {rec.get('icon', '•')} {rec.get('message', '')}\n"
+            if rec.get('tip'):
+                context += f"  → {rec['tip']}\n"
+    
+    context += f"\n⏱️ Estimated Recovery Time: ~{budget_opt.get('estimated_weeks_to_recovery', 'N/A')} weeks\n"
+    
+    context += """
+IMPORTANT: When user's risk is ≥80%, ALWAYS mention budget optimization is active and provide specific recommendations from the optimized budget above.
+"""
+    
+    return context
 
 # ============================================
 # GROQ AI RESPONSE WITH AGENTIC CAPABILITIES
@@ -597,8 +659,150 @@ def health_check():
         "ai_provider": "Groq (Llama 3.3 70B)",
         "agentic_ai": "n8n Integration Enabled",
         "forecaster_available": FORECASTER_AVAILABLE,
+        "budget_optimizer_available": BUDGET_OPTIMIZER_AVAILABLE,
+        "budget_optimizer_threshold": BUDGET_RISK_THRESHOLD,
         "risk_monitoring": risk_monitor_running
     })
+
+# ============================================
+# BUDGET OPTIMIZATION API ROUTES
+# ============================================
+
+@app.route('/api/budget/optimize', methods=['GET', 'POST'])
+def get_budget_optimization():
+    """Get budget optimization report for a user"""
+    try:
+        if request.method == 'POST':
+            data = request.get_json() or {}
+            user_id = data.get('user_id', 'user123')
+        else:
+            user_id = request.args.get('user_id', 'user123')
+        
+        transactions = get_user_transactions(user_id)
+        if not transactions:
+            return jsonify({
+                "success": False,
+                "error": "No transaction data found"
+            }), 404
+        
+        risk_data = calculate_risk_score_from_transactions(transactions)
+        
+        # Check if budget optimization is available and triggered
+        budget_opt = risk_data.get("budget_optimization")
+        
+        if not budget_opt:
+            return jsonify({
+                "success": True,
+                "triggered": False,
+                "risk_score": risk_data['risk_score'],
+                "threshold": BUDGET_RISK_THRESHOLD,
+                "message": f"Budget optimization not triggered. Risk score ({risk_data['risk_score']}%) is below threshold ({BUDGET_RISK_THRESHOLD}%)."
+            })
+        
+        return jsonify({
+            "success": True,
+            "data": budget_opt
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@app.route('/api/budget/summary', methods=['GET'])
+def get_budget_summary():
+    """Get a text summary of budget optimization for chatbot"""
+    try:
+        user_id = request.args.get('user_id', 'user123')
+        
+        transactions = get_user_transactions(user_id)
+        if not transactions:
+            return jsonify({
+                "success": False,
+                "error": "No transaction data found"
+            }), 404
+        
+        risk_data = calculate_risk_score_from_transactions(transactions)
+        
+        if not BUDGET_OPTIMIZER_AVAILABLE:
+            return jsonify({
+                "success": False,
+                "error": "Budget optimizer not available"
+            }), 503
+        
+        summary = get_chatbot_budget_summary(
+            risk_data['income_last_30d'],
+            risk_data.get('category_spending', {}),
+            risk_data['risk_score']
+        )
+        
+        if summary is None:
+            return jsonify({
+                "success": True,
+                "triggered": False,
+                "risk_score": risk_data['risk_score'],
+                "threshold": BUDGET_RISK_THRESHOLD,
+                "message": "Budget optimization not needed at current risk level."
+            })
+        
+        return jsonify({
+            "success": True,
+            "triggered": True,
+            "summary": summary
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@app.route('/api/budget/force-optimize', methods=['POST'])
+def force_budget_optimization():
+    """Force budget optimization regardless of risk score (for testing)"""
+    try:
+        data = request.get_json() or {}
+        user_id = data.get('user_id', 'user123')
+        force_risk = data.get('risk_score', 85)  # Default to 85% for testing
+        
+        transactions = get_user_transactions(user_id)
+        if not transactions:
+            return jsonify({
+                "success": False,
+                "error": "No transaction data found"
+            }), 404
+        
+        risk_data = calculate_risk_score_from_transactions(transactions)
+        
+        if not BUDGET_OPTIMIZER_AVAILABLE:
+            return jsonify({
+                "success": False,
+                "error": "Budget optimizer not available"
+            }), 503
+        
+        # Force optimization with specified risk score
+        report = get_budget_optimization_report(
+            risk_data['income_last_30d'],
+            risk_data.get('category_spending', {}),
+            max(force_risk, BUDGET_RISK_THRESHOLD)  # Ensure it triggers
+        )
+        
+        return jsonify({
+            "success": True,
+            "forced": True,
+            "original_risk": risk_data['risk_score'],
+            "used_risk": max(force_risk, BUDGET_RISK_THRESHOLD),
+            "data": report
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 # ============================================
 # RISK MONITORING API ROUTES
@@ -760,6 +964,7 @@ if __name__ == '__main__':
 ║   Risk Monitoring: Auto-Start ✅                       ║
 ║   Alert Threshold: 80%                                 ║
 ║   Forecaster: {:8}                                 ║
+║   Budget Optimizer: {:8}                           ║
 ║                                                        ║
 ║   🎯 Agentic Capabilities:                             ║
 ║      • Crisis Alerts                                   ║
@@ -767,6 +972,7 @@ if __name__ == '__main__':
 ║      • Smart Budget                                    ║
 ║      • Bill Reminders                                  ║
 ║      • Savings Goals                                   ║
+║      • Budget Optimization (Risk ≥80%)                 ║
 ║                                                        ║
 ║   🔔 Risk Monitoring Endpoints:                        ║
 ║      • GET  /api/monitoring/status                     ║
@@ -774,8 +980,16 @@ if __name__ == '__main__':
 ║      • POST /api/monitoring/stop                       ║
 ║      • GET  /api/alerts                                ║
 ║      • GET  /api/risk/current                          ║
+║                                                        ║
+║   💰 Budget Optimization Endpoints:                    ║
+║      • GET  /api/budget/optimize                       ║
+║      • GET  /api/budget/summary                        ║
+║      • POST /api/budget/force-optimize                 ║
 ╚════════════════════════════════════════════════════════╝
-    """.format("Enabled" if FORECASTER_AVAILABLE else "Disabled"))
+    """.format(
+        "Enabled" if FORECASTER_AVAILABLE else "Disabled",
+        "Enabled" if BUDGET_OPTIMIZER_AVAILABLE else "Disabled"
+    ))
     
     # Auto-start risk monitoring
     start_risk_monitor()

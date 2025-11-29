@@ -6,6 +6,15 @@ from datetime import datetime, timedelta
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 
+# Import budget optimizer
+try:
+    from budget_optimizer import get_budget_optimization_report, get_chatbot_budget_summary, RISK_THRESHOLD as BUDGET_RISK_THRESHOLD
+    BUDGET_OPTIMIZER_AVAILABLE = True
+except ImportError:
+    BUDGET_OPTIMIZER_AVAILABLE = False
+    BUDGET_RISK_THRESHOLD = 80
+    print("Warning: Budget optimizer not available")
+
 # ----------------------------
 # YOUR CATEGORY DEFINITIONS
 # ----------------------------
@@ -316,7 +325,8 @@ def calculate_risk_score_from_transactions(transactions):
             "recommended_actions": actions,
             "top_spending_category": top_category,
             "top_spending_amount": top_amount,
-            "category_spending": category_breakdown
+            "category_spending": category_breakdown,
+            "budget_optimization": _get_budget_optimization(risk_score, total_income, category_breakdown)
         }
         
     except Exception as e:
@@ -335,5 +345,46 @@ def calculate_risk_score_from_transactions(transactions):
                 "recommended_actions": ["Ensure your data includes date, amount, and category."],
                 "top_spending_category": "unknown",
                 "top_spending_amount": 0,
-                "category_spending": category_breakdown
+                "category_spending": category_breakdown,
+                "budget_optimization": None
             }
+
+
+def _get_budget_optimization(risk_score, income, category_spending):
+    """
+    Get budget optimization report if risk score exceeds threshold
+    
+    Args:
+        risk_score: Current risk score (0-100)
+        income: Total income from last 30 days
+        category_spending: Dict of category -> amount spent
+    
+    Returns:
+        Budget optimization report dict or None if not triggered
+    """
+    if not BUDGET_OPTIMIZER_AVAILABLE:
+        # Fallback if budget optimizer not available
+        if risk_score >= BUDGET_RISK_THRESHOLD:
+            return {
+                "triggered": True,
+                "risk_score": risk_score,
+                "threshold": BUDGET_RISK_THRESHOLD,
+                "message": "Budget optimization triggered but module not available",
+                "fallback_recommendation": "Reduce discretionary spending by 20-30%"
+            }
+        return None
+    
+    try:
+        report = get_budget_optimization_report(income, category_spending, risk_score)
+        return report
+    except Exception as e:
+        print(f"Budget optimization error: {e}")
+        if risk_score >= BUDGET_RISK_THRESHOLD:
+            return {
+                "triggered": True,
+                "risk_score": risk_score,
+                "threshold": BUDGET_RISK_THRESHOLD,
+                "error": str(e),
+                "fallback_recommendation": "Reduce discretionary spending by 20-30%"
+            }
+        return None
