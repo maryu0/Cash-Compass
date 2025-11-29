@@ -3,6 +3,25 @@ import { useNavigate } from "react-router-dom";
 import DashboardSidebar from "../components/sidebar/DashboardSidebar";
 import "./ChatbotPage.css";
 
+// Helper to get shown alert IDs from localStorage
+const getShownAlertIds = () => {
+  try {
+    const stored = localStorage.getItem("shownAlertIds");
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  } catch {
+    return new Set();
+  }
+};
+
+// Helper to save shown alert IDs to localStorage
+const saveShownAlertIds = (ids) => {
+  try {
+    localStorage.setItem("shownAlertIds", JSON.stringify([...ids]));
+  } catch {
+    // Ignore storage errors
+  }
+};
+
 const ChatbotPage = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -25,7 +44,7 @@ const ChatbotPage = () => {
   const [latestAlert, setLatestAlert] = useState(null);
   const messagesEndRef = useRef(null);
   const alertCheckIntervalRef = useRef(null);
-  const shownAlertIdsRef = useRef(new Set()); // Track alerts we've already shown (useRef persists across renders)
+  const shownAlertIdsRef = useRef(getShownAlertIds()); // Load from localStorage on init
 
   const quickActions = [
     { label: "📊 Risk Score", message: "What's my risk score?" },
@@ -120,18 +139,38 @@ const ChatbotPage = () => {
 
       if (data.success && data.alerts && data.alerts.length > 0) {
         const newAlerts = data.alerts;
+        const now = new Date();
 
-        // Find alerts we haven't shown yet using the ref
-        const unseenAlerts = newAlerts.filter(
-          (alert) => !shownAlertIdsRef.current.has(alert.id)
-        );
+        // Find alerts we haven't shown yet
+        // Only show alerts where:
+        // 1. Not already shown (stored in localStorage)
+        // 2. Risk score is actually above threshold (80%)
+        // 3. Alert is recent (within last 2 minutes)
+        const unseenAlerts = newAlerts.filter((alert) => {
+          // Check if already shown
+          if (shownAlertIdsRef.current.has(alert.id)) return false;
+
+          // Check if risk score is above threshold
+          if (alert.risk_score < (alert.threshold || 80)) return false;
+
+          // Check if alert is recent (within 2 minutes)
+          if (alert.timestamp) {
+            const alertTime = new Date(alert.timestamp);
+            const diffMs = now - alertTime;
+            const diffMinutes = diffMs / (1000 * 60);
+            if (diffMinutes > 2) return false; // Ignore alerts older than 2 minutes
+          }
+
+          return true;
+        });
 
         if (unseenAlerts.length > 0) {
           // Get the newest unseen alert
           const newestAlert = unseenAlerts[unseenAlerts.length - 1];
 
-          // Mark this alert as shown immediately (using ref, no re-render needed)
+          // Mark this alert as shown and save to localStorage
           shownAlertIdsRef.current.add(newestAlert.id);
+          saveShownAlertIds(shownAlertIdsRef.current);
 
           setLatestAlert(newestAlert);
           setShowAlertPopup(true);

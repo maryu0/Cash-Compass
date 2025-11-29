@@ -18,10 +18,22 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [user, setUser] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showNotificationDropdown, setShowNotificationDropdown] =
+    useState(false);
+  const [crisisAlerts, setCrisisAlerts] = useState([]);
 
   useEffect(() => {
     fetchDashboardData();
+    loadCrisisAlerts();
   }, []);
+
+  const loadCrisisAlerts = () => {
+    const savedAlerts = localStorage.getItem("crisisAlerts");
+    if (savedAlerts) {
+      const alerts = JSON.parse(savedAlerts).filter((a) => !a.isResolved);
+      setCrisisAlerts(alerts);
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {
@@ -204,17 +216,73 @@ const Dashboard = () => {
           </div>
 
           <div className="header-right">
+            <div className="notification-wrapper">
+              <button
+                className="header-icon-btn notification-btn"
+                title="Notifications"
+                onClick={() =>
+                  setShowNotificationDropdown(!showNotificationDropdown)
+                }
+              >
+                <i className="fas fa-bell"></i>
+                {crisisAlerts.length > 0 && (
+                  <span className="notification-badge">
+                    {crisisAlerts.length}
+                  </span>
+                )}
+              </button>
+              {showNotificationDropdown && (
+                <div className="notification-dropdown">
+                  <div className="notification-dropdown-header">
+                    <h4>Crisis Alerts</h4>
+                    <button
+                      onClick={() => navigate("/dashboard/alerts")}
+                      className="view-all-btn"
+                    >
+                      View All
+                    </button>
+                  </div>
+                  <div className="notification-dropdown-content">
+                    {crisisAlerts.length === 0 ? (
+                      <div className="no-notifications">
+                        <i className="fas fa-check-circle"></i>
+                        <p>No active alerts</p>
+                      </div>
+                    ) : (
+                      crisisAlerts.slice(0, 5).map((alert) => (
+                        <div
+                          key={alert.id}
+                          className={`notification-item ${alert.type}`}
+                        >
+                          <div
+                            className={`notification-indicator ${alert.type}`}
+                          ></div>
+                          <div className="notification-content">
+                            <span className="notification-title">
+                              {alert.title}
+                            </span>
+                            <span className="notification-category">
+                              {alert.category}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <button
-              className="header-icon-btn notification-btn"
-              title="Notifications"
+              className="header-icon-btn settings-btn"
+              title="Settings"
+              onClick={() => navigate("/dashboard/settings")}
             >
-              <i className="fas fa-bell"></i>
-              <span className="notification-badge">3</span>
-            </button>
-            <button className="header-icon-btn settings-btn" title="Settings">
               <i className="fas fa-cog"></i>
             </button>
-            <div className="header-profile">
+            <div
+              className="header-profile"
+              onClick={() => navigate("/dashboard/settings?section=profile")}
+            >
               <div className="profile-avatar">
                 {user?.name?.charAt(0)?.toUpperCase() || "U"}
               </div>
