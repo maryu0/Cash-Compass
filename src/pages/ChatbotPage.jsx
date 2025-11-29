@@ -3,24 +3,8 @@ import { useNavigate } from "react-router-dom";
 import DashboardSidebar from "../components/sidebar/DashboardSidebar";
 import "./ChatbotPage.css";
 
-// Helper to get shown alert IDs from localStorage
-const getShownAlertIds = () => {
-  try {
-    const stored = localStorage.getItem("shownAlertIds");
-    return stored ? new Set(JSON.parse(stored)) : new Set();
-  } catch {
-    return new Set();
-  }
-};
-
-// Helper to save shown alert IDs to localStorage
-const saveShownAlertIds = (ids) => {
-  try {
-    localStorage.setItem("shownAlertIds", JSON.stringify([...ids]));
-  } catch {
-    // Ignore storage errors
-  }
-};
+// Risk threshold constant
+const RISK_THRESHOLD = 80;
 
 const ChatbotPage = () => {
   const navigate = useNavigate();
@@ -44,7 +28,7 @@ const ChatbotPage = () => {
   const [latestAlert, setLatestAlert] = useState(null);
   const messagesEndRef = useRef(null);
   const alertCheckIntervalRef = useRef(null);
-  const shownAlertIdsRef = useRef(getShownAlertIds()); // Load from localStorage on init
+  const previousRiskScoreRef = useRef(null); // Track previous risk score to detect threshold crossing
 
   const quickActions = [
     { label: "📊 Risk Score", message: "What's my risk score?" },
@@ -96,6 +80,10 @@ const ChatbotPage = () => {
       const data = await response.json();
       if (data.success) {
         setRiskData(data.data);
+        // Initialize previous risk score on first load (no alert on initial load)
+        if (previousRiskScoreRef.current === null) {
+          previousRiskScoreRef.current = data.data.risk_score;
+        }
       }
     } catch (error) {
       console.error("Error fetching risk data:", error);
@@ -121,15 +109,71 @@ const ChatbotPage = () => {
       const response = await fetch("http://localhost:5001/api/risk/current");
       const data = await response.json();
       if (data.success) {
+        const currentRiskScore = data.data.risk_score;
+        const previousRiskScore = previousRiskScoreRef.current;
+
+        // Check if risk just crossed the threshold (was below, now at or above)
+        const justCrossedThreshold =
+          previousRiskScore !== null &&
+          previousRiskScore < RISK_THRESHOLD &&
+          currentRiskScore >= RISK_THRESHOLD;
+
+        // Update the previous risk score for next check
+        previousRiskScoreRef.current = currentRiskScore;
+
         // Update risk data with critical status
         setRiskData({
           ...data.data,
           is_critical: data.is_critical,
         });
+
+        // Trigger alert if threshold was just crossed
+        if (justCrossedThreshold) {
+          triggerRiskAlert(data.data);
+        }
       }
     } catch (error) {
       console.error("Error fetching current risk:", error);
     }
+  };
+
+  // Function to trigger risk alert popup and chat message
+  const triggerRiskAlert = (riskInfo) => {
+    const alertData = {
+      id: Date.now(),
+      risk_score: riskInfo.risk_score,
+      risk_level: riskInfo.risk_level,
+      threshold: RISK_THRESHOLD,
+      reasons: riskInfo.top_risk_reasons || [],
+      recommended_actions: riskInfo.recommended_actions || [],
+      timestamp: new Date().toISOString(),
+    };
+
+    setLatestAlert(alertData);
+    setShowAlertPopup(true);
+
+    // Auto-hide popup after 10 seconds
+    setTimeout(() => setShowAlertPopup(false), 10000);
+
+    // Add alert message to chat
+    const alertMessage = {
+      id: Date.now(),
+      type: "bot",
+      content: `🚨 **RISK ALERT!**\n\nYour risk score has reached **${
+        alertData.risk_score
+      }%** (threshold: ${alertData.threshold}%)\n\n**Risk Level:** ${
+        alertData.risk_level?.toUpperCase() || "HIGH"
+      }\n\n⚠️ **The risk threshold has been exceeded, so I have automatically modified the budget for each category. Kindly check the Budget section to review the optimized allocations.**\n\n**Reasons:**\n${
+        alertData.reasons?.map((r) => `• ${r}`).join("\n") ||
+        "High spending detected"
+      }\n\n**Recommended Actions:**\n${
+        alertData.recommended_actions?.map((a) => `• ${a}`).join("\n") ||
+        "• Review recent spending\n• Set up a budget"
+      }`,
+      timestamp: new Date(),
+      isAlert: true,
+    };
+    setMessages((prev) => [...prev, alertMessage]);
   };
 
   const checkForNewAlerts = async () => {
@@ -138,68 +182,7 @@ const ChatbotPage = () => {
       const data = await response.json();
 
       if (data.success && data.alerts && data.alerts.length > 0) {
-        const newAlerts = data.alerts;
-        const now = new Date();
-
-        // Find alerts we haven't shown yet
-        // Only show alerts where:
-        // 1. Not already shown (stored in localStorage)
-        // 2. Risk score is actually above threshold (80%)
-        // 3. Alert is recent (within last 2 minutes)
-        const unseenAlerts = newAlerts.filter((alert) => {
-          // Check if already shown
-          if (shownAlertIdsRef.current.has(alert.id)) return false;
-
-          // Check if risk score is above threshold
-          if (alert.risk_score < (alert.threshold || 80)) return false;
-
-          // Check if alert is recent (within 2 minutes)
-          if (alert.timestamp) {
-            const alertTime = new Date(alert.timestamp);
-            const diffMs = now - alertTime;
-            const diffMinutes = diffMs / (1000 * 60);
-            if (diffMinutes > 2) return false; // Ignore alerts older than 2 minutes
-          }
-
-          return true;
-        });
-
-        if (unseenAlerts.length > 0) {
-          // Get the newest unseen alert
-          const newestAlert = unseenAlerts[unseenAlerts.length - 1];
-
-          // Mark this alert as shown and save to localStorage
-          shownAlertIdsRef.current.add(newestAlert.id);
-          saveShownAlertIds(shownAlertIdsRef.current);
-
-          setLatestAlert(newestAlert);
-          setShowAlertPopup(true);
-
-          // Auto-hide popup after 10 seconds
-          setTimeout(() => setShowAlertPopup(false), 10000);
-
-          // Add alert message to chat
-          const alertMessage = {
-            id: Date.now(),
-            type: "bot",
-            content: `🚨 **RISK ALERT!**\n\nYour risk score has reached **${
-              newestAlert.risk_score
-            }%** (threshold: ${newestAlert.threshold}%)\n\n**Risk Level:** ${
-              newestAlert.risk_level?.toUpperCase() || "HIGH"
-            }\n\n**Reasons:**\n${
-              newestAlert.reasons?.map((r) => `• ${r}`).join("\n") ||
-              "High spending detected"
-            }\n\n**Recommended Actions:**\n${
-              newestAlert.recommended_actions
-                ?.map((a) => `• ${a}`)
-                .join("\n") || "• Review recent spending\n• Set up a budget"
-            }`,
-            timestamp: new Date(),
-            isAlert: true,
-          };
-          setMessages((prev) => [...prev, alertMessage]);
-        }
-        setAlerts(newAlerts);
+        setAlerts(data.alerts);
       }
     } catch (error) {
       console.error("Error checking alerts:", error);
@@ -333,6 +316,15 @@ const ChatbotPage = () => {
                 <span className="risk-number">{latestAlert.risk_score}%</span>
                 <span className="risk-label">Risk Score</span>
               </div>
+              <div className="alert-budget-notice">
+                <i className="fas fa-exclamation-triangle"></i>
+                <p>
+                  The risk threshold has been exceeded, so I have automatically
+                  modified the budget for each category.{" "}
+                  <strong>Kindly check the Budget section</strong> to review the
+                  optimized allocations.
+                </p>
+              </div>
               <div className="alert-details">
                 <p className="alert-threshold">
                   Threshold exceeded: {latestAlert.threshold}%
@@ -354,6 +346,16 @@ const ChatbotPage = () => {
               </div>
             </div>
             <div className="alert-popup-actions">
+              <button
+                className="alert-action-btn primary"
+                onClick={() => {
+                  setShowAlertPopup(false);
+                  navigate("/dashboard/budgets");
+                }}
+              >
+                <i className="fas fa-wallet"></i>
+                View Budget
+              </button>
               <button
                 className="alert-action-btn"
                 onClick={() => {
