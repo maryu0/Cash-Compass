@@ -12,17 +12,15 @@ import {
 import "./WeeklySpendingChart.css";
 
 const WeeklySpendingChart = ({ data }) => {
-  // Default data if none provided
-  const defaultData = [
-    { month: "Jul", income: 24000, expenses: 20000 },
-    { month: "Aug", income: 26000, expenses: 21000 },
-    { month: "Sep", income: 28000, expenses: 19000 },
-    { month: "Oct", income: 25000, expenses: 22000 },
-    { month: "Nov", income: 30000, expenses: 24000 },
-    { month: "Dec", income: 32000, expenses: 26000 },
-  ];
+  // Default data if none provided or empty
+  const defaultData = [{ month: "No Data", income: 0, expenses: 0 }];
 
-  const chartData = data || defaultData;
+  const chartData = data && data.length > 0 ? data : defaultData;
+
+  // Check if we have actual data
+  const hasData = chartData.some(
+    (item) => item.income > 0 || item.expenses > 0
+  );
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {

@@ -12,16 +12,12 @@ import "./CategoryPieChart.css";
 const CategoryPieChart = ({ data }) => {
   const [activeIndex, setActiveIndex] = useState(null);
 
-  // Default data if none provided
+  // Default data if none provided or empty
   const defaultData = [
-    { name: "Food", value: 8000, color: "#f59e0b", icon: "🍕" },
-    { name: "Transport", value: 6000, color: "#10b981", icon: "🚗" },
-    { name: "Entertainment", value: 3000, color: "#8b5cf6", icon: "🎬" },
-    { name: "Rent", value: 12000, color: "#3b82f6", icon: "🏠" },
-    { name: "Others", value: 2000, color: "#06b6d4", icon: "📦" },
+    { name: "No Data", value: 1, color: "#94a3b8", icon: "📊" },
   ];
 
-  const chartData = data || defaultData;
+  const chartData = data && data.length > 0 ? data : defaultData;
   const COLORS = chartData.map((item) => item.color);
   const total = chartData.reduce((sum, item) => sum + item.value, 0);
 

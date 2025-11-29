@@ -12,6 +12,7 @@ const router = express.Router();
 
 // Public routes
 router.post("/signup", signup);
+router.post("/register", signup); // Alias for signup
 router.post("/login", login);
 
 // Protected routes

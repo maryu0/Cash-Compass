@@ -1,15 +1,75 @@
 {
   "info": {
-    "name": "CashCompass API",
-    "description": "API endpoints for CashCompass authentication and user management",
+    "name": "CashCompass API - Complete Collection",
+    "description": "Complete API endpoints for CashCompass personal finance management application. Includes Authentication, Dashboard, Transactions, Alerts, and Goals.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT token from login/signup - auto-populated by login script"
+    }
+  ],
   "item": [
     {
-      "name": "Auth",
+      "name": "Health Check",
       "item": [
         {
-          "name": "Signup",
+          "name": "API Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Root Endpoint",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register (Signup)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.token) {",
+                  "        pm.collectionVariables.set('token', jsonData.data.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -23,17 +83,71 @@
               "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\",\n  \"phone\": \"+1234567890\"\n}"
             },
             "url": {
-              "raw": "http://localhost:5000/api/auth/signup",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5000",
-              "path": ["api", "auth", "signup"]
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new user. Also available at /api/auth/signup"
+          },
+          "response": []
+        },
+        {
+          "name": "Register (Signup Alternative)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.token) {",
+                  "        pm.collectionVariables.set('token', jsonData.data.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
             }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jane Doe\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\",\n  \"phone\": \"+1987654321\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "signup"]
+            },
+            "description": "Alternative signup endpoint"
           },
           "response": []
         },
         {
           "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.token) {",
+                  "        pm.collectionVariables.set('token', jsonData.data.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -47,33 +161,30 @@
               "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
             },
             "url": {
-              "raw": "http://localhost:5000/api/auth/login",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5000",
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
               "path": ["api", "auth", "login"]
-            }
+            },
+            "description": "Login with email and password. Token is auto-saved to collection variables."
           },
           "response": []
         },
         {
-          "name": "Get Profile",
+          "name": "Get Current User (Me)",
           "request": {
             "method": "GET",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "description": "Replace {{token}} with your JWT token from login/signup"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
-              "raw": "http://localhost:5000/api/auth/me",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5000",
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
               "path": ["api", "auth", "me"]
-            }
+            },
+            "description": "Get the currently authenticated user's profile"
           },
           "response": []
         },
@@ -88,21 +199,19 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "description": "Replace {{token}} with your JWT token"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Updated\",\n  \"phone\": \"+1987654321\"\n}"
+              "raw": "{\n  \"name\": \"John Updated\",\n  \"phone\": \"+1555555555\"\n}"
             },
             "url": {
-              "raw": "http://localhost:5000/api/auth/profile",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5000",
+              "raw": "{{baseUrl}}/api/auth/profile",
+              "host": ["{{baseUrl}}"],
               "path": ["api", "auth", "profile"]
-            }
+            },
+            "description": "Update current user's profile"
           },
           "response": []
         },
@@ -117,8 +226,7 @@
               },
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "description": "Replace {{token}} with your JWT token"
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -126,31 +234,947 @@
               "raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newpassword123\",\n  \"confirmNewPassword\": \"newpassword123\"\n}"
             },
             "url": {
-              "raw": "http://localhost:5000/api/auth/change-password",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5000",
+              "raw": "{{baseUrl}}/api/auth/change-password",
+              "host": ["{{baseUrl}}"],
               "path": ["api", "auth", "change-password"]
-            }
+            },
+            "description": "Change the current user's password"
           },
           "response": []
         }
       ]
     },
     {
-      "name": "Health Check",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:5000/api/health",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "5000",
-          "path": ["api", "health"]
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard"]
+            },
+            "description": "Get complete dashboard data including summary, recent transactions, alerts, and goals"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dashboard with Time Range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard?timeRange=month",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard"],
+              "query": [
+                {
+                  "key": "timeRange",
+                  "value": "month",
+                  "description": "Options: week, month, quarter, year"
+                }
+              ]
+            },
+            "description": "Get dashboard data filtered by time range"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Risk Score",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/risk-score",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "risk-score"]
+            },
+            "description": "Get the user's financial risk score based on spending patterns"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Monitoring Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/monitoring",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "monitoring"]
+            },
+            "description": "Get real-time monitoring data for the dashboard"
+          },
+          "response": []
+        },
+        {
+          "name": "Start Monitoring Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/monitoring/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "monitoring", "start"]
+            },
+            "description": "Start a real-time monitoring session"
+          },
+          "response": []
+        },
+        {
+          "name": "Stop Monitoring Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/monitoring/stop",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "monitoring", "stop"]
+            },
+            "description": "Stop the real-time monitoring session"
+          },
+          "response": []
         }
-      },
-      "response": []
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Get All Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "Get all transactions for the authenticated user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transactions with Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions?type=expense&category=food&startDate=2024-01-01&endDate=2024-12-31&page=1&limit=10&sort=-date",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "expense",
+                  "description": "Filter by type: income or expense"
+                },
+                {
+                  "key": "category",
+                  "value": "food",
+                  "description": "Filter by category"
+                },
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01",
+                  "description": "Filter from date (YYYY-MM-DD)"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-31",
+                  "description": "Filter to date (YYYY-MM-DD)"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of items per page"
+                },
+                {
+                  "key": "sort",
+                  "value": "-date",
+                  "description": "Sort field (prefix with - for descending)"
+                }
+              ]
+            },
+            "description": "Get transactions with various filters and pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transaction Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "summary"]
+            },
+            "description": "Get transaction summary with totals, category breakdown, and weekly spending"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transaction Summary with Time Range",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/summary?timeRange=month",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "summary"],
+              "query": [
+                {
+                  "key": "timeRange",
+                  "value": "month",
+                  "description": "Options: week, month, quarter, year"
+                }
+              ]
+            },
+            "description": "Get transaction summary filtered by time range"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Transaction",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "TRANSACTION_ID_HERE",
+                  "description": "MongoDB ObjectId of the transaction"
+                }
+              ]
+            },
+            "description": "Get a single transaction by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Expense Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"expense\",\n  \"amount\": 45.99,\n  \"category\": \"food\",\n  \"description\": \"Grocery shopping at Whole Foods\",\n  \"date\": \"2024-11-15\",\n  \"merchant\": \"Whole Foods\",\n  \"paymentMethod\": \"credit_card\",\n  \"tags\": [\"groceries\", \"weekly\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "Create a new expense transaction"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Income Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"income\",\n  \"amount\": 5000.00,\n  \"category\": \"salary\",\n  \"description\": \"Monthly salary\",\n  \"date\": \"2024-11-01\",\n  \"paymentMethod\": \"bank_transfer\",\n  \"isRecurring\": true,\n  \"recurringFrequency\": \"monthly\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions"]
+            },
+            "description": "Create a new income transaction"
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Import Transactions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactions\": [\n    {\n      \"type\": \"expense\",\n      \"amount\": 25.00,\n      \"category\": \"food\",\n      \"description\": \"Lunch\",\n      \"date\": \"2024-11-10\"\n    },\n    {\n      \"type\": \"expense\",\n      \"amount\": 50.00,\n      \"category\": \"transportation\",\n      \"description\": \"Gas\",\n      \"date\": \"2024-11-11\"\n    },\n    {\n      \"type\": \"expense\",\n      \"amount\": 100.00,\n      \"category\": \"utilities\",\n      \"description\": \"Electric bill\",\n      \"date\": \"2024-11-12\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/bulk",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", "bulk"]
+            },
+            "description": "Import multiple transactions at once"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Transaction",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 55.99,\n  \"description\": \"Grocery shopping at Whole Foods - Updated\",\n  \"category\": \"food\",\n  \"tags\": [\"groceries\", \"weekly\", \"organic\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "TRANSACTION_ID_HERE",
+                  "description": "MongoDB ObjectId of the transaction to update"
+                }
+              ]
+            },
+            "description": "Update an existing transaction"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Transaction",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/transactions/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transactions", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "TRANSACTION_ID_HERE",
+                  "description": "MongoDB ObjectId of the transaction to delete"
+                }
+              ]
+            },
+            "description": "Delete a transaction"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Alerts",
+      "item": [
+        {
+          "name": "Get All Alerts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/alerts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "alerts"]
+            },
+            "description": "Get all alerts for the authenticated user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Alerts with Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/alerts?severity=high&category=budget&isRead=false&isResolved=false&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "alerts"],
+              "query": [
+                {
+                  "key": "severity",
+                  "value": "high",
+                  "description": "Filter by severity: low, medium, high, critical"
+                },
+                {
+                  "key": "category",
+                  "value": "budget",
+                  "description": "Filter by category: budget, spending, goal, security, system"
+                },
+                {
+                  "key": "isRead",
+                  "value": "false",
+                  "description": "Filter by read status"
+                },
+                {
+                  "key": "isResolved",
+                  "value": "false",
+                  "description": "Filter by resolved status"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            },
+            "description": "Get alerts with various filters"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Alert",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/alerts/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "alerts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ALERT_ID_HERE",
+                  "description": "MongoDB ObjectId of the alert"
+                }
+              ]
+            },
+            "description": "Get a single alert by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Budget Warning\",\n  \"message\": \"You have exceeded 80% of your monthly food budget\",\n  \"type\": \"warning\",\n  \"severity\": \"high\",\n  \"category\": \"budget\",\n  \"actionUrl\": \"/dashboard/budget\",\n  \"actionLabel\": \"View Budget\",\n  \"metadata\": {\n    \"budgetCategory\": \"food\",\n    \"percentUsed\": 82,\n    \"remainingAmount\": 90\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/alerts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "alerts"]
+            },
+            "description": "Create a new alert"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Alert as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/alerts/:id/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "alerts", ":id", "read"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ALERT_ID_HERE",
+                  "description": "MongoDB ObjectId of the alert"
+                }
+              ]
+            },
+            "description": "Mark a single alert as read"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark All Alerts as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/alerts/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "alerts", "read-all"]
+            },
+            "description": "Mark all user's alerts as read"
+          },
+          "response": []
+        },
+        {
+          "name": "Resolve Alert",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/alerts/:id/resolve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "alerts", ":id", "resolve"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ALERT_ID_HERE",
+                  "description": "MongoDB ObjectId of the alert"
+                }
+              ]
+            },
+            "description": "Mark an alert as resolved"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Alert",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/alerts/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "alerts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "ALERT_ID_HERE",
+                  "description": "MongoDB ObjectId of the alert to delete"
+                }
+              ]
+            },
+            "description": "Delete an alert"
+          },
+          "response": []
+        },
+        {
+          "name": "Clear All Resolved Alerts",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/alerts/clear-resolved",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "alerts", "clear-resolved"]
+            },
+            "description": "Delete all resolved alerts"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Goals",
+      "item": [
+        {
+          "name": "Get All Goals",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/goals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "goals"]
+            },
+            "description": "Get all goals for the authenticated user"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Goals with Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/goals?status=in_progress&category=savings&priority=high&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "goals"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "in_progress",
+                  "description": "Filter by status: not_started, in_progress, completed, paused, cancelled"
+                },
+                {
+                  "key": "category",
+                  "value": "savings",
+                  "description": "Filter by category: savings, debt_payoff, investment, purchase, emergency_fund, retirement, education, vacation, other"
+                },
+                {
+                  "key": "priority",
+                  "value": "high",
+                  "description": "Filter by priority: low, medium, high"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                }
+              ]
+            },
+            "description": "Get goals with various filters"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Goal",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/goals/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "goals", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "GOAL_ID_HERE",
+                  "description": "MongoDB ObjectId of the goal"
+                }
+              ]
+            },
+            "description": "Get a single goal by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Savings Goal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Emergency Fund\",\n  \"description\": \"Build 6-month emergency fund\",\n  \"targetAmount\": 15000,\n  \"currentAmount\": 3000,\n  \"category\": \"emergency_fund\",\n  \"priority\": \"high\",\n  \"targetDate\": \"2025-06-30\",\n  \"color\": \"#4CAF50\",\n  \"icon\": \"shield\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/goals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "goals"]
+            },
+            "description": "Create a new savings goal"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Vacation Goal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Hawaii Vacation\",\n  \"description\": \"Family vacation to Hawaii\",\n  \"targetAmount\": 5000,\n  \"currentAmount\": 500,\n  \"category\": \"vacation\",\n  \"priority\": \"medium\",\n  \"targetDate\": \"2025-08-15\",\n  \"color\": \"#2196F3\",\n  \"icon\": \"airplane\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/goals",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "goals"]
+            },
+            "description": "Create a vacation savings goal"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Goal",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Emergency Fund - Updated\",\n  \"targetAmount\": 18000,\n  \"priority\": \"high\",\n  \"targetDate\": \"2025-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/goals/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "goals", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "GOAL_ID_HERE",
+                  "description": "MongoDB ObjectId of the goal to update"
+                }
+              ]
+            },
+            "description": "Update an existing goal"
+          },
+          "response": []
+        },
+        {
+          "name": "Add Progress to Goal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 500,\n  \"note\": \"Monthly contribution\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/goals/:id/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "goals", ":id", "progress"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "GOAL_ID_HERE",
+                  "description": "MongoDB ObjectId of the goal"
+                }
+              ]
+            },
+            "description": "Add progress/contribution to a goal"
+          },
+          "response": []
+        },
+        {
+          "name": "Archive Goal",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/goals/:id/archive",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "goals", ":id", "archive"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "GOAL_ID_HERE",
+                  "description": "MongoDB ObjectId of the goal to archive"
+                }
+              ]
+            },
+            "description": "Archive a goal (soft delete)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Goal",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/goals/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "goals", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "GOAL_ID_HERE",
+                  "description": "MongoDB ObjectId of the goal to delete"
+                }
+              ]
+            },
+            "description": "Permanently delete a goal"
+          },
+          "response": []
+        }
+      ]
     }
   ]
 }

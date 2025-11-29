@@ -101,15 +101,47 @@ const GoalsPage = () => {
 
     setUser(JSON.parse(userData));
 
-    // Load goals from localStorage or use mock data
-    const savedGoals = localStorage.getItem("financialGoals");
-    if (savedGoals) {
-      setGoals(JSON.parse(savedGoals));
-    } else {
-      setGoals(mockGoals);
-      localStorage.setItem("financialGoals", JSON.stringify(mockGoals));
-    }
+    // Fetch goals from API
+    fetchGoals(token);
   }, [navigate]);
+
+  const fetchGoals = async (token) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/goals", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          const apiGoals = result.data.map((goal) => ({
+            id: goal._id,
+            name: goal.name,
+            category: goal.category || "custom",
+            targetAmount: goal.targetAmount,
+            currentAmount: goal.currentAmount,
+            deadline: goal.deadline ? goal.deadline.split("T")[0] : "",
+            description: goal.description || "",
+            createdAt: goal.createdAt ? goal.createdAt.split("T")[0] : "",
+          }));
+
+          setGoals(apiGoals);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching goals:", error);
+      // Fallback to localStorage if API fails
+      const savedGoals = localStorage.getItem("financialGoals");
+      if (savedGoals) {
+        setGoals(JSON.parse(savedGoals));
+      } else {
+        setGoals(mockGoals);
+      }
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");

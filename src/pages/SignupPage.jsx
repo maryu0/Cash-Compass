@@ -50,36 +50,34 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      // TODO: Connect to backend API
-      // const response = await fetch('http://localhost:5000/api/auth/signup', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // });
-      // const data = await response.json();
-      // if (data.success) {
-      //   localStorage.setItem('token', data.data.token);
-      //   localStorage.setItem('user', JSON.stringify(data.data.user));
-      // }
+      // Connect to backend API
+      const response = await fetch("http://localhost:5000/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          phone: formData.phone,
+        }),
+      });
 
-      console.log("Sign up:", formData);
+      const data = await response.json();
 
-      // Mock authentication - Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (!response.ok) {
+        throw new Error(data.message || "Signup failed");
+      }
 
-      // Mock user data
-      const mockUser = {
-        id: "1",
-        name: formData.fullName,
-        email: formData.email,
-      };
-      const mockToken = "mock-jwt-token-" + Date.now();
+      if (data.success) {
+        localStorage.setItem("token", data.data.token);
+        localStorage.setItem("user", JSON.stringify(data.data.user));
 
-      localStorage.setItem("token", mockToken);
-      localStorage.setItem("user", JSON.stringify(mockUser));
-
-      // Redirect to dashboard
-      navigate("/dashboard");
+        // Redirect to dashboard
+        navigate("/dashboard");
+      } else {
+        throw new Error(data.message || "Signup failed");
+      }
     } catch (err) {
       setError(err.message || "Signup failed. Please try again.");
     } finally {

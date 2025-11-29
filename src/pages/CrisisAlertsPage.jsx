@@ -97,18 +97,57 @@ const CrisisAlertsPage = () => {
 
     setUser(JSON.parse(userData));
 
-    // Load alerts from localStorage or use mock data
-    const savedAlerts = localStorage.getItem("crisisAlerts");
-    if (savedAlerts) {
-      setAlerts(JSON.parse(savedAlerts));
-    } else {
-      setAlerts(mockAlerts);
-      localStorage.setItem("crisisAlerts", JSON.stringify(mockAlerts));
-    }
-
-    // Calculate risk score based on active critical/warning alerts
-    calculateRiskScore(savedAlerts ? JSON.parse(savedAlerts) : mockAlerts);
+    // Fetch alerts from API
+    fetchAlerts(token);
   }, [navigate]);
+
+  const fetchAlerts = async (token) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/alerts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          const apiAlerts = result.data.map((alert) => ({
+            id: alert._id,
+            type: alert.type || "warning",
+            title: alert.title,
+            message: alert.message,
+            category: alert.category || "Budget",
+            amount:
+              typeof alert.amount === "number"
+                ? `₹${Math.abs(alert.amount).toLocaleString()}`
+                : alert.amount,
+            threshold: alert.threshold,
+            timestamp: new Date(
+              alert.createdAt || alert.timestamp
+            ).toISOString(),
+            isRead: alert.isRead || false,
+            isResolved: alert.isResolved || false,
+          }));
+
+          setAlerts(apiAlerts);
+          calculateRiskScore(apiAlerts);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching alerts:", error);
+      // Fallback to localStorage if API fails
+      const savedAlerts = localStorage.getItem("crisisAlerts");
+      if (savedAlerts) {
+        setAlerts(JSON.parse(savedAlerts));
+        calculateRiskScore(JSON.parse(savedAlerts));
+      } else {
+        setAlerts(mockAlerts);
+        calculateRiskScore(mockAlerts);
+      }
+    }
+  };
 
   const calculateRiskScore = (alertsList) => {
     const activeAlerts = alertsList.filter((a) => !a.isResolved);

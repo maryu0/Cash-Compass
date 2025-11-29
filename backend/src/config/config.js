@@ -13,6 +13,13 @@ export const config = {
     expire: process.env.JWT_EXPIRE || "7d",
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
+      "http://127.0.0.1:3000",
+      "http://127.0.0.1:5173",
+    ],
   },
 };

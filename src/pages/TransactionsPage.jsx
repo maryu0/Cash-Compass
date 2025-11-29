@@ -128,25 +128,58 @@ const TransactionsPage = () => {
 
     setUser(JSON.parse(userData));
 
-    // Load saved transactions from localStorage
-    const savedTransactions = localStorage.getItem("uploadedTransactions");
-    if (savedTransactions) {
-      try {
-        const parsedTransactions = JSON.parse(savedTransactions);
-        if (parsedTransactions.length > 0) {
-          setTransactions(parsedTransactions);
-          const grouped = groupTransactionsByCategory(parsedTransactions);
-          setGroupedTransactions(grouped);
-          setSummary(calculateSummary(parsedTransactions));
+    // Fetch transactions from API
+    fetchTransactions(token);
+  }, [navigate]);
 
-          // Keep all categories collapsed by default
+  const fetchTransactions = async (token) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/transactions", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          const apiTransactions = result.data.map((t, index) => ({
+            id: t._id || index,
+            date: t.date,
+            amount: t.amount,
+            category: t.category,
+            description: t.description,
+            isExpense: t.amount < 0,
+          }));
+
+          setTransactions(apiTransactions);
+          const grouped = groupTransactionsByCategory(apiTransactions);
+          setGroupedTransactions(grouped);
+          setSummary(calculateSummary(apiTransactions));
           setExpandedCategories({});
         }
-      } catch (error) {
-        console.error("Error loading saved transactions:", error);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      // Fallback to localStorage if API fails
+      const savedTransactions = localStorage.getItem("uploadedTransactions");
+      if (savedTransactions) {
+        try {
+          const parsedTransactions = JSON.parse(savedTransactions);
+          if (parsedTransactions.length > 0) {
+            setTransactions(parsedTransactions);
+            const grouped = groupTransactionsByCategory(parsedTransactions);
+            setGroupedTransactions(grouped);
+            setSummary(calculateSummary(parsedTransactions));
+            setExpandedCategories({});
+          }
+        } catch (err) {
+          console.error("Error loading saved transactions:", err);
+        }
       }
     }
-  }, [navigate]);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -460,6 +493,7 @@ const TransactionsPage = () => {
               </p>
               <div className="csv-format-hint">
                 <h4>
+                  {" "}
                   <i className="fas fa-info-circle"></i> Expected CSV Format:
                 </h4>
                 <code>date,amount,category</code>
