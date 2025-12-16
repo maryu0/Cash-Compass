@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import "./Hero.css";
+import DashboardPreview from "./DashboardPreview";
 
 export default function Hero() {
   useEffect(() => {
@@ -120,26 +121,7 @@ export default function Hero() {
           </div>
         </div>
         <div className="hero-image">
-          <div className="dashboard-image-wrapper">
-            <img 
-              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" 
-              alt="Financial Dashboard Analytics"
-              className="dashboard-img"
-            />
-            <div className="image-overlay"></div>
-            <div className="floating-card card-1">
-              <i className="fas fa-chart-line"></i>
-              <span>+24.5%</span>
-            </div>
-            <div className="floating-card card-2">
-              <i className="fas fa-piggy-bank"></i>
-              <span>₹12,450</span>
-            </div>
-            <div className="floating-card card-3">
-              <i className="fas fa-shield-alt"></i>
-              <span>Protected</span>
-            </div>
-          </div>
+          <DashboardPreview />
         </div>
       </div>
     </section>

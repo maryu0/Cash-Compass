@@ -103,16 +103,186 @@ export default function LoginPage() {
 
         <div className="illustration">
           <svg
-            viewBox="0 0 500 400"
+            viewBox="0 0 400 300"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <circle cx="250" cy="200" r="150" fill="rgba(255,255,255,0.1)" />
-            <path
-              d="M200 150 L250 100 L300 150 L250 200 Z"
-              fill="rgba(255,255,255,0.2)"
+            <defs>
+              <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop
+                  offset="0%"
+                  style={{ stopColor: "#60A5FA", stopOpacity: 0.8 }}
+                />
+                <stop
+                  offset="100%"
+                  style={{ stopColor: "#A78BFA", stopOpacity: 0.8 }}
+                />
+              </linearGradient>
+              <linearGradient id="grad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop
+                  offset="0%"
+                  style={{ stopColor: "#34D399", stopOpacity: 0.8 }}
+                />
+                <stop
+                  offset="100%"
+                  style={{ stopColor: "#60A5FA", stopOpacity: 0.8 }}
+                />
+              </linearGradient>
+              <linearGradient id="grad3" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop
+                  offset="0%"
+                  style={{ stopColor: "#FBBF24", stopOpacity: 0.8 }}
+                />
+                <stop
+                  offset="100%"
+                  style={{ stopColor: "#F59E0B", stopOpacity: 0.8 }}
+                />
+              </linearGradient>
+            </defs>
+
+            {/* Background circles */}
+            <circle cx="200" cy="150" r="120" fill="rgba(96, 165, 250, 0.15)" />
+            <circle cx="200" cy="150" r="80" fill="rgba(167, 139, 250, 0.1)" />
+
+            {/* Growth chart bars with gradients */}
+            <rect
+              x="50"
+              y="180"
+              width="35"
+              height="70"
+              rx="6"
+              fill="url(#grad1)"
             />
-            <circle cx="250" cy="200" r="80" fill="rgba(255,255,255,0.15)" />
+            <rect
+              x="100"
+              y="160"
+              width="35"
+              height="90"
+              rx="6"
+              fill="url(#grad1)"
+            />
+            <rect
+              x="150"
+              y="130"
+              width="35"
+              height="120"
+              rx="6"
+              fill="url(#grad2)"
+            />
+            <rect
+              x="200"
+              y="100"
+              width="35"
+              height="150"
+              rx="6"
+              fill="url(#grad2)"
+            />
+            <rect
+              x="250"
+              y="70"
+              width="35"
+              height="180"
+              rx="6"
+              fill="url(#grad3)"
+            />
+            <rect
+              x="300"
+              y="40"
+              width="35"
+              height="210"
+              rx="6"
+              fill="url(#grad3)"
+            />
+
+            {/* Trend line */}
+            <path
+              d="M 67 215 L 117 185 L 167 155 L 217 125 L 267 95 L 317 65"
+              stroke="#FBBF24"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+
+            {/* Dots on trend line */}
+            <circle
+              cx="67"
+              cy="215"
+              r="6"
+              fill="#60A5FA"
+              stroke="white"
+              strokeWidth="2"
+            />
+            <circle
+              cx="117"
+              cy="185"
+              r="6"
+              fill="#60A5FA"
+              stroke="white"
+              strokeWidth="2"
+            />
+            <circle
+              cx="167"
+              cy="155"
+              r="6"
+              fill="#34D399"
+              stroke="white"
+              strokeWidth="2"
+            />
+            <circle
+              cx="217"
+              cy="125"
+              r="6"
+              fill="#34D399"
+              stroke="white"
+              strokeWidth="2"
+            />
+            <circle
+              cx="267"
+              cy="95"
+              r="6"
+              fill="#FBBF24"
+              stroke="white"
+              strokeWidth="2"
+            />
+            <circle
+              cx="317"
+              cy="65"
+              r="6"
+              fill="#FBBF24"
+              stroke="white"
+              strokeWidth="2"
+            />
+
+            {/* Up arrow */}
+            <path
+              d="M 335 55 L 350 35 L 365 55 L 350 50 Z"
+              fill="#34D399"
+              stroke="white"
+              strokeWidth="2"
+            />
+
+            {/* Dollar signs */}
+            <text
+              x="80"
+              y="90"
+              fill="#60A5FA"
+              fontSize="24"
+              fontWeight="bold"
+              opacity="0.7"
+            >
+              $
+            </text>
+            <text
+              x="320"
+              y="25"
+              fill="#FBBF24"
+              fontSize="28"
+              fontWeight="bold"
+              opacity="0.8"
+            >
+              $
+            </text>
           </svg>
         </div>
       </div>

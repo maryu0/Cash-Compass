@@ -26,8 +26,8 @@
 
 .hero .container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 40px;
   align-items: center;
   width: 100%;
   max-width: 1400px;
@@ -37,7 +37,7 @@
 
 .hero-content {
   flex: 1;
-  padding-right: 60px;
+  padding-right: 20px;
 }
 
 .hero-badge {
@@ -151,7 +151,8 @@
 .hero-image {
   flex: 1;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
+  align-items: center;
   position: relative;
 }
 
@@ -184,7 +185,11 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1) 0%,
+    rgba(139, 92, 246, 0.1) 100%
+  );
   border-radius: 20px;
   opacity: 0;
   transition: opacity 0.4s ease;
@@ -275,18 +280,33 @@
 }
 
 @keyframes float1 {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes float2 {
-  0%, 100% { transform: translateX(0px); }
-  50% { transform: translateX(8px); }
+  0%,
+  100% {
+    transform: translateX(0px);
+  }
+  50% {
+    transform: translateX(8px);
+  }
 }
 
 @keyframes float3 {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(2deg); }
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
 }
 
 .dashboard-preview {

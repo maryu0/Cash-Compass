@@ -33,11 +33,14 @@ body {
 }
 
 .app {
-  width: 100%;
-  min-width: 100%;
+  width: 100vw;
+  min-width: 100vw;
+  max-width: 100vw;
   overflow-x: hidden;
   padding-top: 80px;
   margin: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 /* Dashboard should not have top padding */

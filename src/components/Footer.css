@@ -2,21 +2,21 @@
 footer {
   background: var(--primary);
   color: white;
-  padding: 60px 40px 30px;
+  padding: 60px 0 30px;
   width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  max-width: none;
   box-sizing: border-box;
+  margin: 0;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
 }
 
 footer > .container {
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-  padding: 0;
+  padding: 0 40px;
+  box-sizing: border-box;
 }
 
 .footer-grid {
