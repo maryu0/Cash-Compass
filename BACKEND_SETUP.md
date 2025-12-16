@@ -36,8 +36,10 @@ CORS_ORIGIN=http://localhost:3000
 **MongoDB URI Format:**
 
 ```
-mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/cashcompass?retryWrites=true&w=majority
+mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/cashcompass?retryWrites=true&w=majority
 ```
+
+**⚠️ SECURITY WARNING:** Never commit actual credentials. Always use environment variables and add `.env` to `.gitignore`.
 
 ### 4. Start the server
 

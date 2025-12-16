@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
 
-const MONGODB_URI =
-  "mongodb+srv://ayush:ayush003@cluster0.rxm4jbd.mongodb.net/";
+dotenv.config();
+
+const MONGODB_URI = process.env.MONGODB_URI;
 
 async function updatePassword() {
   try {
